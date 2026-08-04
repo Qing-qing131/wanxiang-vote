@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>万巷虚拟男友 - 人气投票</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --primary: #2b7de1;
+    --primary-dark: #1c5fc2;
+    --primary-light: #5ba0ff;
+    --bg-top: #1466cc;
+    --bg-bottom: #0d4a9e;
+    --accent: #00d4ff;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
+    min-height: 100vh;
+    color: #fff;
+    padding-bottom: 40px;
+  }
+
+  /* ---- 顶部标题区 ---- */
+  .header {
+    position: relative;
+    text-align: center;
+    padding: 28px 20px 20px;
+    overflow: hidden;
+  }
+  .header::before {
+    content: "VOTE";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 110px;
+    font-weight: 900;
+    color: rgba(255,255,255,0.05);
+    letter-spacing: 10px;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 0;
+  }
+  .header > * { position: relative; z-index: 1; }
+  .header h1 {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: 4px;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  }
+  .header .subtitle {
+    margin-top: 8px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.7);
+    letter-spacing: 1px;
+  }
+
+  /* ---- 倒计时/活动信息 ---- */
+  .info-bar {
+    text-align: center;
+    margin-top: 12px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.8);
+  }
+  .info-bar .time {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 4px 14px;
+    border-radius: 14px;
+    background: rgba(0,0,0,0.15);
+    font-size: 12px;
+  }
+
+  /* ---- 我的票数 ---- */
+  .my-vote-box {
+    max-width: 320px;
+    margin: 16px auto 0;
+    padding: 10px 20px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(6px);
+    text-align: center;
+    font-size: 14px;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+  .my-vote-box span {
+    color: #ffe56d;
+    font-weight: 700;
+    font-size: 18px;
+  }
+
+  /* ---- 搜索框 ---- */
+  .search-wrap {
+    max-width: 420px;
+    margin: 24px auto 10px;
+    padding: 0 20px;
+    position: relative;
+  }
+  .search-input {
+    width: 100%;
+    padding: 14px 46px 14px 18px;
+    border-radius: 26px;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    background: rgba(255,255,255,0.18);
+    backdrop-filter: blur(8px);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.25);
+    transition: all 0.3s ease;
+  }
+  .search-input::placeholder {
+    color: rgba(255,255,255,0.55);
+  }
+  .search-input:focus {
+    background: rgba(255,255,255,0.25);
+    border-color: rgba(255,255,255,0.45);
+  }
+  .search-icon {
+    position: absolute;
+    right: 34px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    color: rgba(255,255,255,0.7);
+    pointer-events: none;
+  }
+
+  /* ---- 搜索结果提示 ---- */
+  .result-tip {
+    text-align: center;
+    font-size: 13px;
+    color: rgba(255,255,255,0.6);
+    margin-top: 6px;
+    min-height: 20px;
+  }
+
+  /* ---- 主播网格 ---- */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 18px 14px;
+    max-width: 680px;
+    margin: 24px auto 0;
+    padding: 0 20px;
+  }
+
+  .host-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    padding: 12px 6px;
+    border-radius: 16px;
+    transition: all 0.25s ease;
+  }
+  .host-item:hover {
+    background: rgba(255,255,255,0.08);
+    transform: translateY(-3px);
+  }
+
+  /* ---- 排名标记 ---- */
+  .rank-tag {
+    position: absolute;
+    top: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 22px;
+    height: 22px;
+    border-radius: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    z-index: 2;
+    padding: 0 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  }
+  .rank-tag.top1 { background: linear-gradient(135deg, #ffd700, #ffb700); color: #333; }
+  .rank-tag.top2 { background: linear-gradient(135deg, #e0e0e0, #bdbdbd); color: #333; }
+  .rank-tag.top3 { background: linear-gradient(135deg, #cd7f32, #b8722e); color: #fff; }
+  .rank-tag.other { background: rgba(0,0,0,0.35); color: rgba(255,255,255,0.8); }
+
+  /* ---- 头像 ---- */
+  .avatar-wrap {
+    position: relative;
+    width: 86px;
+    height: 86px;
+    margin-top: 10px;
+  }
+  .avatar {
+    width: 86px;
+    height: 86px;
+    border-radius: 50%;
+    border: 3px solid rgba(255,255,255,0.35);
+    object-fit: cover;
+    display: block;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+  .avatar:hover {
+    border-color: var(--accent);
+    transform: scale(1.05);
+  }
+  .avatar-placeholder {
+    width: 86px;
+    height: 86px;
+    border-radius: 50%;
+    border: 3px solid rgba(255,255,255,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: 700;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+  .avatar-placeholder:hover {
+    border-color: var(--accent);
+    transform: scale(1.05);
+  }
+
+  /* ---- 名字 ---- */
+  .name {
+    margin-top: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    text-align: center;
+  }
+
+  /* ---- 音色 ---- */
+  .voice-tag {
+    margin-top: 4px;
+    font-size: 11px;
+    color: rgba(255,255,255,0.65);
+    text-align: center;
+  }
+
+  /* ---- 投票按钮 ---- */
+  .btn-vote {
+    margin-top: 10px;
+    padding: 6px 18px;
+    border: none;
+    border-radius: 16px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    background: linear-gradient(135deg, var(--primary-light), var(--primary));
+    color: #fff;
+    box-shadow: 0 3px 10px rgba(43,125,225,0.4);
+    min-width: 72px;
+  }
+  .btn-vote:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 14px rgba(43,125,225,0.55);
+  }
+  .btn-vote:active {
+    transform: scale(0.96);
+  }
+  .btn-vote.voted {
+    background: rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.45);
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+
+  /* ---- 票数 ---- */
+  .vote-count {
+    margin-top: 6px;
+    font-size: 13px;
+    color: #ffe56d;
+    font-weight: 700;
+  }
+
+  /* ---- 连接状态 ---- */
+  .sync-badge {
+    display: inline-block;
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 10px;
+    margin-left: 6px;
+    font-weight: 600;
+  }
+  .sync-badge.online {
+    background: rgba(0,212,255,0.2);
+    color: #00d4ff;
+  }
+  .sync-badge.offline {
+    background: rgba(255,107,107,0.2);
+    color: #ff6b6b;
+  }
+  .sync-badge.local {
+    background: rgba(255,229,109,0.2);
+    color: #ffe56d;
+  }
+
+  /* ---- 底部 ---- */
+  .footer {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.35);
+  }
+
+  /* ---- 飘心动画 ---- */
+  .heart {
+    position: fixed;
+    pointer-events: none;
+    font-size: 20px;
+    animation: floatHeart 1s ease-out forwards;
+    z-index: 9999;
+  }
+  @keyframes floatHeart {
+    0% { opacity: 1; transform: translateY(0) scale(0.5); }
+    100% { opacity: 0; transform: translateY(-80px) scale(1.5); }
+  }
+
+  /* ---- 无结果提示 ---- */
+  .no-result {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 40px;
+    color: rgba(255,255,255,0.5);
+    font-size: 14px;
+  }
+
+  /* ---- 移动端 ---- */
+  @media (max-width: 480px) {
+    .grid { grid-template-columns: repeat(3, 1fr); gap: 12px 8px; }
+    .avatar-wrap, .avatar, .avatar-placeholder { width: 74px; height: 74px; }
+    .name { font-size: 13px; }
+    .btn-vote { padding: 5px 12px; font-size: 12px; min-width: 60px; }
+    .header h1 { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>万巷虚拟男友</h1>
+  <p class="subtitle">为你心动的声音投上一票</p>
+  <div class="info-bar">
+    <div>助力全部进行中 · 实时更新排名<span class="sync-badge local" id="syncBadge">本地模式</span></div>
+    <div class="time">投票截止至 <span id="endTime">2026-08-10 23:59</span></div>
+  </div>
+  <div class="my-vote-box">
+    我的助力值：<span id="myVotes">1</span>
+  </div>
+</div>
+
+<div class="search-wrap">
+  <input type="text" class="search-input" id="searchInput" placeholder="搜索主播名字 / 音色">
+  <span class="search-icon">🔍</span>
+</div>
+<p class="result-tip" id="resultTip"></p>
+
+<div class="grid" id="cardGrid"></div>
+
+<div class="footer">
+  <p>点击头像可跳转B站视频 · 每人限投1票 · 票数全网实时同步</p>
+</div>
+
+<script>
+  // =================================================================
+  //  Supabase 配置 —— 部署前必须替换下面的 URL 和 KEY
+  //  在 Supabase 项目 → Settings → API 页面可以找到这两项
+  // =================================================================
+  const SUPABASE_URL = "https://qbetwvnvzbkmhsedzdil.supabase.co/rest/v1/";   // 示例：https://abc123.supabase.co
+  const SUPABASE_ANON_KEY = "sb_publishable_QY0jjNNrq7vN2hMyqICb_A_LGQkzxLD";           // 示例：eyJhbGciOiJI...
+  const HAS_SUPABASE = SUPABASE_URL.startsWith("http") && !SUPABASE_URL.includes("YOUR_");
+  const POLL_INTERVAL = 5000;  // 每5秒同步一次全网票数
+
+  // =================================================================
+  //  主播数据 — 在此修改主播名单
+  // =================================================================
+  const hosts = [
+    {
+      name: "主播A",
+      avatar: "",
+      avatarColor: "#5ba0ff",
+      voice: "温柔治愈系",
+      biliUrl: "https://www.bilibili.com/video/BVxxxxxxxx"
+    },
+    {
+      name: "主播B",
+      avatar: "",
+      avatarColor: "#7c3aed",
+      voice: "低音炮学长",
+      biliUrl: "https://www.bilibili.com/video/BVxxxxxxxx"
+    },
+    {
+      name: "主播C",
+      avatar: "",
+      avatarColor: "#0ea5e9",
+      voice: "慵懒御姐音",
+      biliUrl: "https://www.bilibili.com/video/BVxxxxxxxx"
+    },
+    {
+      name: "主播D",
+      avatar: "",
+      avatarColor: "#f59e0b",
+      voice: "阳光正太音",
+      biliUrl: "https://www.bilibili.com/video/BVxxxxxxxx"
+    },
+    {
+      name: "主播E",
+      avatar: "",
+      avatarColor: "#10b981",
+      voice: "清冷禁欲系",
+      biliUrl: "https://www.bilibili.com/video/BVxxxxxxxx"
+    },
+    {
+      name: "主播F",
+      avatar: "",
+      avatarColor: "#ef4444",
+      voice: "奶凶年下音",
+      biliUrl: "https://www.bilibili.com/video/BVxxxxxxxx"
+    },
+    {
+      name: "主播G",
+      avatar: "",
+      avatarColor: "#ec4899",
+      voice: "霸道总裁音",
+      biliUrl: "https://www.bilibili.com/video/BVxxxxxxxx"
+    },
+    {
+      name: "主播H",
+      avatar: "",
+      avatarColor: "#8b5cf6",
+      voice: "年下撒娇音",
+      biliUrl: "https://www.bilibili.com/video/BVxxxxxxxx"
+    }
+  ];
+  // =================================================================
+
+  // 全局投票缓存
+  let voteCache = {};
+  let isVoting = false;
+  let votedHostName = null;
+
+  // ---------- Supabase API 请求封装 ----------
+  async function supabaseGet(path) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+      headers: {
+        "apikey": SUPABASE_ANON_KEY,
+        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+      }
+    });
+    if (!res.ok) throw new Error(`GET ${path} → ${res.status}`);
+    return res.json();
+  }
+
+  async function supabaseRpc(fnName, body) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fnName}`, {
+      method: "POST",
+      headers: {
+        "apikey": SUPABASE_ANON_KEY,
+        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`RPC ${fnName} → ${res.status}: ${text}`);
+    }
+    return res.json();
+  }
+
+  // ---------- 云端投票操作 ----------
+  async function fetchAllVotes() {
+    const rows = await supabaseGet("votes?select=host_name,count");
+    const map = {};
+    rows.forEach(r => { map[r.host_name] = r.count; });
+    return map;
+  }
+
+  async function castVoteRemote(hostName) {
+    const result = await supabaseRpc("increment_vote", {
+      host_name_param: hostName
+    });
+    return result;
+  }
+
+  // ---------- 本地投票标记 ----------
+  function loadVotedState() {
+    const saved = localStorage.getItem("votedHost");
+    if (saved) {
+      const data = JSON.parse(saved);
+      // 可以添加过期机制，这里先永久保存
+      votedHostName = data.hostName;
+      document.getElementById("myVotes").textContent = "0";
+      return true;
+    }
+    return false;
+  }
+
+  function saveVotedState(hostName) {
+    votedHostName = hostName;
+    localStorage.setItem("votedHost", JSON.stringify({
+      hostName: hostName,
+      time: Date.now()
+    }));
+    document.getElementById("myVotes").textContent = "0";
+  }
+
+  // ---------- 搜索 ----------
+  const searchInput = document.getElementById("searchInput");
+  let currentKeyword = "";
+  searchInput.addEventListener("input", () => {
+    currentKeyword = searchInput.value.trim();
+    renderCards(currentKeyword);
+  });
+
+  // ---------- 渲染 ----------
+  function renderCards(keyword = "") {
+    const resultTip = document.getElementById("resultTip");
+    const voted = !!votedHostName;
+
+    // 没有配置 Supabase 时使用 localStorage 回退
+    let voteMap;
+    if (HAS_SUPABASE) {
+      voteMap = voteCache;
+    } else {
+      voteMap = {};
+      hosts.forEach((h, i) => {
+        const local = localStorage.getItem("vote_" + i);
+        voteMap[h.name] = local ? parseInt(local) : 0;
+      });
+    }
+
+    let filtered = hosts.map((h, i) => ({
+      ...h, index: i, votes: voteMap[h.name] || 0
+    }));
+
+    if (keyword) {
+      const lowerK = keyword.toLowerCase();
+      filtered = filtered.filter(h =>
+        h.name.toLowerCase().includes(lowerK) ||
+        h.voice.toLowerCase().includes(lowerK)
+      );
+      resultTip.textContent = `搜索 "${keyword}" 找到 ${filtered.length} 位主播`;
+    } else {
+      resultTip.textContent = "";
+    }
+
+    // 按票数降序排列
+    filtered.sort((a, b) => b.votes - a.votes);
+
+    const total = filtered.reduce((s, h) => s + h.votes, 0);
+
+    const grid = document.getElementById("cardGrid");
+    grid.innerHTML = "";
+
+    if (filtered.length === 0) {
+      grid.innerHTML = `<div class="no-result">没有找到匹配的主播，换个关键词试试~</div>`;
+      return;
+    }
+
+    filtered.forEach((host, rank) => {
+      let rankClass = "other";
+      if (rank === 0) rankClass = "top1";
+      else if (rank === 1) rankClass = "top2";
+      else if (rank === 2) rankClass = "top3";
+
+      const avatarHtml = host.avatar
+        ? `<img class="avatar" src="${host.avatar}" alt="${host.name}" onclick="openBili(${host.index})">`
+        : `<div class="avatar-placeholder" style="background:${host.avatarColor}" onclick="openBili(${host.index})">${host.name.charAt(0)}</div>`;
+
+      const isMyVote = host.name === votedHostName;
+      const btnDisabled = voted && !isMyVote;
+      const btnText = isMyVote ? '已助力' : (voted ? '已助力他人' : '为他助力');
+      const btnClass = (voted && isMyVote) ? 'voted' : (voted ? 'voted disabled' : '');
+
+      const item = document.createElement("div");
+      item.className = "host-item";
+      item.innerHTML = `
+        <div class="rank-tag ${rankClass}">${rank + 1}</div>
+        ${isMyVote ? '<div style="position:absolute;top:-2px;right:6px;font-size:11px;color:#ffe56d;z-index:2;">我的选择</div>' : ''}
+        <div class="avatar-wrap">${avatarHtml}</div>
+        <div class="name">${host.name}</div>
+        <div class="voice-tag">${host.voice}</div>
+        <button class="btn-vote ${btnClass}"
+          onclick="vote(${host.index}, event)"
+          ${btnDisabled ? 'disabled' : ''}>
+          ${btnText}
+        </button>
+        <div class="vote-count">${host.votes} 票</div>
+      `;
+      grid.appendChild(item);
+    });
+
+    // 更新全局统计
+    if (total > 0) {
+      document.getElementById("myVotes").textContent = votedHostName ? "已投" : "未投";
+    }
+  }
+
+  // ---------- 跳转B站 ----------
+  function openBili(index) {
+    const host = hosts[index];
+    if (host && host.biliUrl) {
+      window.open(host.biliUrl, "_blank");
+    }
+  }
+
+  // ---------- 投票 ----------
+  async function vote(index, event) {
+    if (votedHostName || isVoting) return;
+    const host = hosts[index];
+    if (!host) return;
+    isVoting = true;
+
+    try {
+      if (HAS_SUPABASE) {
+        // 云端投票 —— 原子递增，全网同步
+        await castVoteRemote(host.name);
+        // 投票成功后刷新票数
+        voteCache = await fetchAllVotes();
+      } else {
+        // 无 Supabase 时的本地回退
+        const current = parseInt(localStorage.getItem("vote_" + index) || "0");
+        localStorage.setItem("vote_" + index, current + 1);
+        voteCache[host.name] = current + 1;
+      }
+
+      saveVotedState(host.name);
+      createHeart(event);
+      renderCards(currentKeyword);
+    } catch (err) {
+      console.error("投票失败：", err);
+      alert("投票失败，请稍后重试\n" + (err.message || "网络错误"));
+    } finally {
+      isVoting = false;
+    }
+  }
+
+  // ---------- 飘心 ----------
+  function createHeart(e) {
+    const heart = document.createElement("div");
+    heart.className = "heart";
+    heart.textContent = "❤";
+    heart.style.left = (e.clientX - 10) + "px";
+    heart.style.top = (e.clientY - 10) + "px";
+    heart.style.color = "#ffe56d";
+    document.body.appendChild(heart);
+    setTimeout(() => heart.remove(), 1000);
+  }
+
+  // ---------- 轮询全网同步 ----------
+  async function pollVotes() {
+    if (!HAS_SUPABASE) return;
+    try {
+      voteCache = await fetchAllVotes();
+      renderCards(currentKeyword);
+    } catch (err) {
+      console.warn("轮询同步失败：", err.message);
+    }
+  }
+
+  // ---------- 启动 ----------
+  (async function init() {
+    const badge = document.getElementById("syncBadge");
+    loadVotedState();
+
+    if (!HAS_SUPABASE) {
+      badge.textContent = "本地模式";
+      badge.className = "sync-badge local";
+      console.warn("⚠ 未配置 Supabase，票数存储在本地浏览器中，刷新后保留但无法全网同步。");
+      console.warn("请替换 SUPABASE_URL 和 SUPABASE_ANON_KEY 后重新部署。");
+    } else {
+      try {
+        voteCache = await fetchAllVotes();
+        badge.textContent = "已同步";
+        badge.className = "sync-badge online";
+      } catch (err) {
+        badge.textContent = "同步失败";
+        badge.className = "sync-badge offline";
+        console.error("初始化加载票数失败：", err);
+      }
+    }
+
+    renderCards(currentKeyword);
+
+    // 启动定时同步
+    if (HAS_SUPABASE) {
+      setInterval(async () => {
+        try {
+          await pollVotes();
+          badge.textContent = "已同步";
+          badge.className = "sync-badge online";
+        } catch (err) {
+          badge.textContent = "同步失败";
+          badge.className = "sync-badge offline";
+        }
+      }, POLL_INTERVAL);
+    }
+  })();
+</script>
+
+</body>
+</html>
