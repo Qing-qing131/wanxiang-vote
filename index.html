@@ -354,7 +354,7 @@
     <div class="time">投票截止至 <span id="endTime">2026-08-10 23:59</span></div>
   </div>
   <div class="my-vote-box">
-    我的助力值：<span id="myVotes">1</span>
+    剩余助力票数：<span id="myVotes">3</span> / 3
   </div>
 </div>
 
@@ -367,7 +367,8 @@
 <div class="grid" id="cardGrid"></div>
 
 <div class="footer">
-  <p>点击头像可跳转B站视频 · 每人限投1票 · 票数全网实时同步</p>
+  <p>点击头像可跳转B站视频 · 每人3票可投同一人或不同人 · 票数全网实时同步</p>
+  <p style="margin-top:4px;font-size:11px;color:rgba(255,255,255,0.25);">已启用防刷票保护 · 设备指纹 + IP频率限制</p>
 </div>
 
 <script>
@@ -375,8 +376,8 @@
   //  Supabase 配置 —— 部署前必须替换下面的 URL 和 KEY
   //  在 Supabase 项目 → Settings → API 页面可以找到这两项
   // =================================================================
-  const SUPABASE_URL = "https://qbetwvnvzbkmhsedzdil.supabase.co/rest/v1/";   // 示例：https://abc123.supabase.co
-  const SUPABASE_ANON_KEY = "sb_publishable_QY0jjNNrq7vN2hMyqICb_A_LGQkzxLD";           // 示例：eyJhbGciOiJI...
+  const SUPABASE_URL = "https://qbetwvnvzbkmhsedzdil.supabase.co";   // 不要加 /rest/v1/ 后缀
+  const SUPABASE_ANON_KEY = "sb_publishable_QY0jjNNrq7vN2hMyqICb_A_LGQkzxLD";
   const HAS_SUPABASE = SUPABASE_URL.startsWith("http") && !SUPABASE_URL.includes("YOUR_");
   const POLL_INTERVAL = 5000;  // 每5秒同步一次全网票数
 
@@ -384,69 +385,103 @@
   //  主播数据 — 在此修改主播名单
   // =================================================================
   const hosts = [
-    {
-      name: "主播A",
-      avatar: "",
-      avatarColor: "#5ba0ff",
-      voice: "温柔治愈系",
-      biliUrl: "https://www.bilibili.com/video/BVxxxxxxxx"
-    },
-    {
-      name: "主播B",
-      avatar: "",
-      avatarColor: "#7c3aed",
-      voice: "低音炮学长",
-      biliUrl: "https://www.bilibili.com/video/BVxxxxxxxx"
-    },
-    {
-      name: "主播C",
-      avatar: "",
-      avatarColor: "#0ea5e9",
-      voice: "慵懒御姐音",
-      biliUrl: "https://www.bilibili.com/video/BVxxxxxxxx"
-    },
-    {
-      name: "主播D",
-      avatar: "",
-      avatarColor: "#f59e0b",
-      voice: "阳光正太音",
-      biliUrl: "https://www.bilibili.com/video/BVxxxxxxxx"
-    },
-    {
-      name: "主播E",
-      avatar: "",
-      avatarColor: "#10b981",
-      voice: "清冷禁欲系",
-      biliUrl: "https://www.bilibili.com/video/BVxxxxxxxx"
-    },
-    {
-      name: "主播F",
-      avatar: "",
-      avatarColor: "#ef4444",
-      voice: "奶凶年下音",
-      biliUrl: "https://www.bilibili.com/video/BVxxxxxxxx"
-    },
-    {
-      name: "主播G",
-      avatar: "",
-      avatarColor: "#ec4899",
-      voice: "霸道总裁音",
-      biliUrl: "https://www.bilibili.com/video/BVxxxxxxxx"
-    },
-    {
-      name: "主播H",
-      avatar: "",
-      avatarColor: "#8b5cf6",
-      voice: "年下撒娇音",
-      biliUrl: "https://www.bilibili.com/video/BVxxxxxxxx"
-    }
+    { name: "709",   avatar: "avatars/709_謎.png",   avatarColor: "#5ba0ff", voice: "青年音",   biliUrl: "" },
+    { name: "snow",  avatar: "avatars/snow_謎.png",  avatarColor: "#7c3aed", voice: "暖男音",   biliUrl: "" },
+    { name: "sugar", avatar: "avatars/sugar_謎.png", avatarColor: "#0ea5e9", voice: "奶狗音",   biliUrl: "" },
+    { name: "云川",  avatar: "avatars/云川_謎.jpg",  avatarColor: "#f59e0b", voice: "低音炮",   biliUrl: "" },
+    { name: "冬眠",  avatar: "avatars/冬眠_謎.png",  avatarColor: "#10b981", voice: "少年音",   biliUrl: "" },
+    { name: "君述",  avatar: "avatars/君述_謎.png",  avatarColor: "#ef4444", voice: "清冷音",   biliUrl: "" },
+    { name: "怨物",  avatar: "avatars/怨物_謎.png",  avatarColor: "#ec4899", voice: "病娇音",   biliUrl: "" },
+    { name: "扎扎",  avatar: "avatars/扎扎_謎.png",  avatarColor: "#8b5cf6", voice: "元气少年", biliUrl: "" },
+    { name: "星星",  avatar: "avatars/星星_謎.png",  avatarColor: "#14b8a6", voice: "温柔音",   biliUrl: "" },
+    { name: "晚安",  avatar: "avatars/晚安_謎.png",  avatarColor: "#f97316", voice: "助眠音",   biliUrl: "" },
+    { name: "晴",    avatar: "avatars/晴_謎.png",    avatarColor: "#6366f1", voice: "阳光音",   biliUrl: "" },
+    { name: "晴云",  avatar: "avatars/晴云_謎.png",  avatarColor: "#22c55e", voice: "邻家哥哥", biliUrl: "" },
+    { name: "木星",  avatar: "avatars/木星_謎.png",  avatarColor: "#e11d48", voice: "霸道音",   biliUrl: "" },
+    { name: "枕头",  avatar: "avatars/枕头_謎.png",  avatarColor: "#a855f7", voice: "软萌音",   biliUrl: "" },
+    { name: "柒一",  avatar: "avatars/柒一_謎.png",  avatarColor: "#06b6d4", voice: "学长音",   biliUrl: "" },
+    { name: "栀诚",  avatar: "avatars/栀诚_謎.png",  avatarColor: "#d946ef", voice: "沉稳音",   biliUrl: "" },
+    { name: "白舟",  avatar: "avatars/白舟_謎.jpg",  avatarColor: "#84cc16", voice: "文艺音",   biliUrl: "" },
+    { name: "白菜",  avatar: "avatars/白菜_謎.png",  avatarColor: "#f43f5e", voice: "可爱音",   biliUrl: "" },
+    { name: "苏一",  avatar: "avatars/苏一_謎.png",  avatarColor: "#3b82f6", voice: "温柔攻",   biliUrl: "" }
   ];
   // =================================================================
 
   // 全局投票缓存
   let voteCache = {};
   let isVoting = false;
-  let votedHostName = null;
+  let votedHosts = [];           // 已投主播列表（可重复）
+  let votesRemaining = 3;        // 剩余票数
+  const MAX_VOTES = 3;           // 每人最多3票
+  let pageLoadTime = Date.now();  // 页面加载时间，用于防机器人
+  let clientIp = null;
+
+  // ---------- 浏览器指纹生成（风控核心） ----------
+  async function generateFingerprint() {
+    // 1. Canvas 指纹 —— 通过渲染差异生成唯一标识
+    let canvasFP = "";
+    try {
+      const canvas = document.createElement("canvas");
+      canvas.width = 200;
+      canvas.height = 50;
+      const ctx = canvas.getContext("2d");
+      ctx.textBaseline = "top";
+      ctx.font = "14px 'Arial'";
+      ctx.fillStyle = "#f60";
+      ctx.fillRect(0, 0, 100, 30);
+      ctx.fillStyle = "#069";
+      ctx.fillText("万巷投票\xu4e07\u5df7", 2, 15);
+      ctx.fillStyle = "rgba(102, 204, 0, 0.7)";
+      ctx.fillText("万巷投票\xu4e07\u5df7", 4, 17);
+      canvasFP = canvas.toDataURL();
+    } catch (e) {
+      canvasFP = "no-canvas";
+    }
+
+    // 2. 收集设备特征
+    const features = [
+      navigator.userAgent || "",
+      navigator.language || "",
+      navigator.languages ? navigator.languages.join(",") : "",
+      navigator.platform || "",
+      navigator.hardwareConcurrency ? navigator.hardwareConcurrency.toString() : "0",
+      navigator.deviceMemory ? navigator.deviceMemory.toString() : "0",
+      navigator.maxTouchPoints ? navigator.maxTouchPoints.toString() : "0",
+      screen.width + "x" + screen.height,
+      screen.colorDepth ? screen.colorDepth.toString() : "0",
+      screen.availWidth + "x" + screen.availHeight,
+      new Date().getTimezoneOffset().toString(),
+     Intl.DateTimeFormat().resolvedOptions().timeZone || "",
+      canvasFP
+    ].join("|");
+
+    // 3. 用 localStorage 存一个随机 ID，增加稳定性
+    let storedId = localStorage.getItem("fp_id");
+    if (!storedId) {
+      storedId = "id_" + Math.random().toString(36).substr(2, 12) + Date.now().toString(36);
+      localStorage.setItem("fp_id", storedId);
+    }
+
+    // 4. 简易哈希（不依赖外部库）
+    const raw = features + "|" + storedId;
+    let hash = 0;
+    for (let i = 0; i < raw.length; i++) {
+      hash = ((hash << 5) - hash) + raw.charCodeAt(i);
+      hash = hash & hash;
+    }
+    return "fp_" + Math.abs(hash).toString(36) + "_" + storedId;
+  }
+
+  // ---------- 获取客户端 IP（用于 IP 频率风控） ----------
+  async function fetchClientIp() {
+    try {
+      const res = await fetch("https://api.ipify.org?format=json");
+      const data = await res.json();
+      return data.ip || null;
+    } catch (e) {
+      return null;  // 获取失败不影响投票
+    }
+  }
 
   // ---------- Supabase API 请求封装 ----------
   async function supabaseGet(path) {
@@ -486,32 +521,46 @@
   }
 
   async function castVoteRemote(hostName) {
+    const fp = await generateFingerprint();
     const result = await supabaseRpc("increment_vote", {
-      host_name_param: hostName
+      host_name_param: hostName,
+      fingerprint_param: fp,
+      ip_param: clientIp,
+      ua_param: navigator.userAgent.substring(0, 200)
     });
     return result;
   }
 
   // ---------- 本地投票标记 ----------
   function loadVotedState() {
-    const saved = localStorage.getItem("votedHost");
+    const saved = localStorage.getItem("votedHosts");
     if (saved) {
       const data = JSON.parse(saved);
-      // 可以添加过期机制，这里先永久保存
-      votedHostName = data.hostName;
-      document.getElementById("myVotes").textContent = "0";
+      votedHosts = data.hosts || [];
+      votesRemaining = MAX_VOTES - votedHosts.length;
+      updateVoteDisplay();
       return true;
     }
     return false;
   }
 
   function saveVotedState(hostName) {
-    votedHostName = hostName;
-    localStorage.setItem("votedHost", JSON.stringify({
-      hostName: hostName,
+    votedHosts.push(hostName);
+    votesRemaining = MAX_VOTES - votedHosts.length;
+    localStorage.setItem("votedHosts", JSON.stringify({
+      hosts: votedHosts,
       time: Date.now()
     }));
-    document.getElementById("myVotes").textContent = "0";
+    updateVoteDisplay();
+  }
+
+  function updateVoteDisplay() {
+    document.getElementById("myVotes").textContent = votesRemaining;
+  }
+
+  // 获取某个主播已收到的本用户票数
+  function getMyVotesForHost(hostName) {
+    return votedHosts.filter(h => h === hostName).length;
   }
 
   // ---------- 搜索 ----------
@@ -525,7 +574,6 @@
   // ---------- 渲染 ----------
   function renderCards(keyword = "") {
     const resultTip = document.getElementById("resultTip");
-    const voted = !!votedHostName;
 
     // 没有配置 Supabase 时使用 localStorage 回退
     let voteMap;
@@ -577,16 +625,31 @@
         ? `<img class="avatar" src="${host.avatar}" alt="${host.name}" onclick="openBili(${host.index})">`
         : `<div class="avatar-placeholder" style="background:${host.avatarColor}" onclick="openBili(${host.index})">${host.name.charAt(0)}</div>`;
 
-      const isMyVote = host.name === votedHostName;
-      const btnDisabled = voted && !isMyVote;
-      const btnText = isMyVote ? '已助力' : (voted ? '已助力他人' : '为他助力');
-      const btnClass = (voted && isMyVote) ? 'voted' : (voted ? 'voted disabled' : '');
+      const myVotesForThis = getMyVotesForHost(host.name);
+      const noVotesLeft = votesRemaining <= 0;
+      const btnDisabled = noVotesLeft && myVotesForThis === 0;
+      let btnText, btnClass;
+
+      if (noVotesLeft) {
+        btnText = myVotesForThis > 0 ? `已助力 ×${myVotesForThis}` : '票已投完';
+        btnClass = 'voted';
+      } else if (myVotesForThis > 0) {
+        btnText = `再投一票 (${myVotesForThis})`;
+        btnClass = '';
+      } else {
+        btnText = '为他助力';
+        btnClass = '';
+      }
+
+      const myVoteBadge = myVotesForThis > 0
+        ? `<div style="position:absolute;top:-2px;right:6px;font-size:11px;color:#ffe56d;z-index:2;">我的${myVotesForThis}票</div>`
+        : '';
 
       const item = document.createElement("div");
       item.className = "host-item";
       item.innerHTML = `
         <div class="rank-tag ${rankClass}">${rank + 1}</div>
-        ${isMyVote ? '<div style="position:absolute;top:-2px;right:6px;font-size:11px;color:#ffe56d;z-index:2;">我的选择</div>' : ''}
+        ${myVoteBadge}
         <div class="avatar-wrap">${avatarHtml}</div>
         <div class="name">${host.name}</div>
         <div class="voice-tag">${host.voice}</div>
@@ -601,9 +664,7 @@
     });
 
     // 更新全局统计
-    if (total > 0) {
-      document.getElementById("myVotes").textContent = votedHostName ? "已投" : "未投";
-    }
+    updateVoteDisplay();
   }
 
   // ---------- 跳转B站 ----------
@@ -616,16 +677,47 @@
 
   // ---------- 投票 ----------
   async function vote(index, event) {
-    if (votedHostName || isVoting) return;
+    if (votesRemaining <= 0 || isVoting) return;
     const host = hosts[index];
     if (!host) return;
+
+    // 风控：页面停留不足 3 秒，拒绝投票（防机器人脚本）
+    const dwellTime = (Date.now() - pageLoadTime) / 1000;
+    if (dwellTime < 3) {
+      alert("页面加载中，请稍等几秒再投票~");
+      return;
+    }
+
     isVoting = true;
 
     try {
       if (HAS_SUPABASE) {
-        // 云端投票 —— 原子递增，全网同步
-        await castVoteRemote(host.name);
-        // 投票成功后刷新票数
+        // 云端投票 —— 带指纹和IP的风控投票
+        const result = await castVoteRemote(host.name);
+
+        // 检查风控返回
+        if (result && result.success === false) {
+          if (result.error === "max_votes_reached") {
+            // 服务端发现已投完3票，同步本地状态
+            votesRemaining = 0;
+            localStorage.setItem("votedHosts", JSON.stringify({
+              hosts: votedHosts,
+              time: Date.now()
+            }));
+            updateVoteDisplay();
+            renderCards(currentKeyword);
+            alert("你已经投完3票了~");
+          } else if (result.error === "ip_rate_limited") {
+            alert("该网络环境下投票过于频繁，请稍后再试");
+          } else if (result.error === "global_rate_limited") {
+            alert("系统繁忙，请稍后再试");
+          } else {
+            alert(result.message || "投票被拒绝");
+          }
+          return;
+        }
+
+        // 投票成功，刷新票数
         voteCache = await fetchAllVotes();
       } else {
         // 无 Supabase 时的本地回退
@@ -673,6 +765,9 @@
     const badge = document.getElementById("syncBadge");
     loadVotedState();
 
+    // 后台获取客户端 IP（不阻塞页面渲染）
+    fetchClientIp().then(ip => { clientIp = ip; });
+
     if (!HAS_SUPABASE) {
       badge.textContent = "本地模式";
       badge.className = "sync-badge local";
@@ -683,6 +778,35 @@
         voteCache = await fetchAllVotes();
         badge.textContent = "已同步";
         badge.className = "sync-badge online";
+
+        // 风控：检查当前设备在服务端已投多少票
+        try {
+          const fp = await generateFingerprint();
+          const checkRes = await fetch(`${SUPABASE_URL}/rest/v1/voter_records?fingerprint=eq.${encodeURIComponent(fp)}&select=host_name,voted_at`, {
+            headers: {
+              "apikey": SUPABASE_ANON_KEY,
+              "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+            }
+          });
+          if (checkRes.ok) {
+            const records = await checkRes.json();
+            if (records && records.length > 0) {
+              // 服务端已有投票记录，同步本地状态
+              votedHosts = records.map(r => r.host_name);
+              // 如果服务端票数比本地多，以服务端为准
+              if (votedHosts.length > (MAX_VOTES - votesRemaining)) {
+                votesRemaining = Math.max(0, MAX_VOTES - votedHosts.length);
+                localStorage.setItem("votedHosts", JSON.stringify({
+                  hosts: votedHosts,
+                  time: Date.now()
+                }));
+                updateVoteDisplay();
+              }
+            }
+          }
+        } catch (e) {
+          console.warn("检查远程投票状态失败:", e.message);
+        }
       } catch (err) {
         badge.textContent = "同步失败";
         badge.className = "sync-badge offline";
