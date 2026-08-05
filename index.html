@@ -237,14 +237,6 @@
     text-align: center;
   }
 
-  /* ---- 音色 ---- */
-  .voice-tag {
-    margin-top: 4px;
-    font-size: 11px;
-    color: rgba(255,255,255,0.65);
-    text-align: center;
-  }
-
   /* ---- 投票按钮 ---- */
   .btn-vote {
     margin-top: 10px;
@@ -359,7 +351,7 @@
 </div>
 
 <div class="search-wrap">
-  <input type="text" class="search-input" id="searchInput" placeholder="搜索主播名字 / 音色">
+  <input type="text" class="search-input" id="searchInput" placeholder="搜索主播名字">
   <span class="search-icon">🔍</span>
 </div>
 <p class="result-tip" id="resultTip"></p>
@@ -594,8 +586,7 @@
     if (keyword) {
       const lowerK = keyword.toLowerCase();
       filtered = filtered.filter(h =>
-        h.name.toLowerCase().includes(lowerK) ||
-        h.voice.toLowerCase().includes(lowerK)
+        h.name.toLowerCase().includes(lowerK)
       );
       resultTip.textContent = `搜索 "${keyword}" 找到 ${filtered.length} 位主播`;
     } else {
@@ -652,7 +643,6 @@
         ${myVoteBadge}
         <div class="avatar-wrap">${avatarHtml}</div>
         <div class="name">${host.name}</div>
-        <div class="voice-tag">${host.voice}</div>
         <button class="btn-vote ${btnClass}"
           onclick="vote(${host.index}, event)"
           ${btnDisabled ? 'disabled' : ''}>
